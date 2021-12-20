@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Penguin Coders Chat</title>
+    <!--Link to CSS -->
+    <link href="../static/bootstrap.min.css" rel="stylesheet" />
+    <link href="../static/style.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+        <script type="text/javascript" charset="utf-8">
+            var socket;
+            $(document).ready(function(){
+                socket = io.connect('http://' + document.domain + ':' + location.port + '/chat');
+                socket.on('connect', function() {
+                    socket.emit('join', {});
+                });
+
+                socket.on('message', function(data) {
+                    $('<p class="message" style="margin-top: 15px; padding:8px"><img src="https://www.icmetl.org/scientific-committee/attachment/dr-ali-akdemir/" class="avatar">' + data.msg + ' </p>').appendTo('#chate');
+                    $('#chate').scrollTop($('#chate')[0].scrollHeight);
+                });
+
+                socket.on('message_to_csa', function(data) {
+                    $('<p class="message csa_message" style="margin-top: 15px; padding:8px"><img src="https://freesvg.org/img/1538298822.png" class="bot">' + data.msg + '</p>').appendTo('#chate');
+                    $('#chate').scrollTop($('#chate')[0].scrollHeight);
+                });
+
+                $('#send').click(function(e) {
+                    text = $('#text').val();
+                        $('#text').val('');
+                        socket.emit('text', {msg: text});
+                });
+            });
+            function leave_room() {
+                socket.emit('left', {}, function() {
+                    socket.disconnect();
+                    // go back to the login page
+                    window.location.href = "{{ url_for('index') }}";
+                });
+            }
+        </script>
+  </head>
+
+  <body>
+  <div class="container">
+      <div class="header">
+          <h1>Customer Support</h1>
+      </div>
+      <div id="chate" class="body">
+          <div id="csa" class="message csa_message"></div>
+          <div id="user" class="message"></div>
+      </div>
+      <div class="footer">
+          <form method="post">
+              <input type="text" id="text">
+              <button type="button" id="send">Send</button>
+          </form>
+      </div>
+      <button type="button" onclick=leave_room()>Verlassen</button>
+  </div>
+  </body>
+</html>
